@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Matching Game</title>
+	<style type="text/css">
+	img {
+		position: absolute;
+	}
+	div {
+		position: absolute;
+		width: 500px;
+		height: 500px;
+	}
+	#rightSide {
+		left: 500px;
+		border-left: 2px solid red;
+	}
+	li {
+		background-color: aqua;
+		color: blue;
+		font-size: 16px;
+	}
+	h1 {
+		font-family: Arial;
+		color: red;
+	}
+
+	</style>
+</head>
+<body onload="generateFaces()">
+	<h1>Matching Faces game</h1>
+	<p><b>Here are the instructions to Play</b></p>
+	<ul>
+		<li>You will see two panels, one in left and other in right</li>
+		<li>Both are loaded with few smiling faces, at similar position</li>
+		<li>However there is one extra face in leftside and you have to find it</li>
+		<li>If you identify and click it, you will get more smiles in you life :) means you will move to next level with more faces</li>
+		<li>Again here you need to find new extra face. Till you find it correct, you will be promoted to next level with increased faces</li>
+		<li>If you click a wrong face or anywhere else, you will have other reason to smile. Your game will be over and no need to play this boring game more ;) </li>
+		<li>So have a coffee and start playing. Have fun</li>
+	</ul>
+
+	<div id="leftSide"></div>
+	<div id="rightSide"></div>
+
+<script type="text/javascript">
+	var numberOfFaces = 5;  // When Game starts
+
+	// Getting the DOM elements
+	var theLeftSide = document.getElementById("leftSide");
+	var theRightSide = document.getElementById("rightSide");
+	var theBody = document.getElementsByTagName ("body") [0];
+
+	/* The key function to generate the faces within limits*/
+	function generateFaces () {
+		for (var i=0; i<numberOfFaces; i++) {
+			var myFace = document.createElement("img");
+			myFace.src = "http://home.cse.ust.hk/~rossiter/mooc/matching_game/smile.png";
+
+			/*Using Alt text so if something goes wrong with image path,
+			User can play with text, however easy to find from number at end*/
+			myFace.alt = "Face Number " + i;
+
+			/* Seeting the limits for absolute positions 0-399*/
+			var imgTop = Math.floor(Math.random() * 400);
+			myFace.style.top = imgTop + "px";
+
+			var imgLeft = Math.floor(Math.random() * 400);
+			myFace.style.left = imgLeft+ "px";
+
+			theLeftSide.appendChild(myFace);  /* Here we go, page started smiling*/
+		}
+		/*Left is done, so do what is right*/
+		addToRightSide();
+
+		/* Its a bad design to call this function here, actually its a workaround to code working. Eventhandlers should be independent. But my event handler onclick works on theLeftSide.lastChild which is null at start, so browser throw error and don't make a handler. So I made a function and call it here as lastChild is available here. If any reviewer can suggest me a better apparoach, I would be greatful */
+		clickLastChild();
+	}
+
+	/* This function get the whole left side, delete the last child and then generate the one lesser faces in right Div*/
+	function addToRightSide () {
+		// Get the whole left DOM branch including div
+		var leftSideImages = theLeftSide.cloneNode(true);
+
+		// Remove the last child of itself
+		leftSideImages.removeChild(leftSideImages.lastChild); 
+
+		// Now add branch with one less smile to poor Right Side
+		theRightSide.appendChild(leftSideImages);
+	}
+
+	/* This should not have been there but I need to have it. Comment at function call explain my excuse. Here I tried event listener than onclick*/
+	function clickLastChild() {
+		theLeftSide.lastChild.addEventListener ("click" , function higherLevel (event) {
+				event.stopPropagation ();
+				/* Before generating new faces, we need to delete old ones from both divs*/
+				deletingOldFaces();  
+				numberOfFaces += 5;   // Increased the level
+				generateFaces ();
+		});
+	}
+
+	// Event handler for body apart from correct face
+	theBody.onclick = function gameOver () {
+		alert ("Stay smiling, you need not clicking more. Game is Over!!!");
+		theBody.onclick = null;
+		theLeftSide.lastChild.onclick = null;
+		deletingOldFaces();   // Clean the panels from too much smiles
+	}
+
+	function deletingOldFaces () {
+		while(theLeftSide.firstChild)
+			theLeftSide.removeChild(theLeftSide.firstChild);
+
+		while(theRightSide.firstChild)
+			theRightSide.removeChild(theRightSide.firstChild);
+	}
+
+</script>
+</body>
+</html>
